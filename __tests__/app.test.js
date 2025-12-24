@@ -32,7 +32,9 @@ describe('GET /all', () => {
     const res = await request(app).get('/all');
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual(rows);
+    expect(res.body.data.items).toEqual(rows);
+    expect(res.body.data.total).toBe(rows.length);
+    expect(res.body.metadata).toHaveProperty('generated_in_ms');
     expect(connection.query).toHaveBeenCalledWith('SELECT * from data', expect.any(Function));
   });
 
@@ -42,6 +44,7 @@ describe('GET /all', () => {
     const res = await request(app).get('/all');
 
     expect(res.status).toBe(500);
+    expect(res.body).toHaveProperty('error');
   });
 });
 
@@ -66,7 +69,8 @@ describe('POST /new', () => {
       .field('author', 'a');
 
     expect(res.status).toBe(200);
-    expect(res.text).toBe('fixed-uuid.png');
+    expect(res.body.data.fileName).toBe('fixed-uuid.png');
+    expect(res.body.metadata).toHaveProperty('generated_in_ms');
     expect(writeFileSpy).toHaveBeenCalledTimes(1);
     expect(connection.query).toHaveBeenCalled();
     expect(connection.query.mock.calls[0][0]).toContain('INSERT INTO data');
@@ -78,6 +82,7 @@ describe('POST /new', () => {
       .field('name', 'n');
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('image required');
   });
 
   test('возвращает 500 если БД упала', async () => {
@@ -89,6 +94,7 @@ describe('POST /new', () => {
       .field('name', 'n');
 
     expect(res.status).toBe(500);
+    expect(res.body.error).toContain('db fail');
   });
 });
 

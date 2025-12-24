@@ -78,3 +78,18 @@ jobs:
             docker compose --env-file .env -f deploy/docker-compose.prod.yml pull
             docker compose --env-file .env -f deploy/docker-compose.prod.yml up -d
             docker image prune -f
+
+  loadtest:
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run loadtest
+        env:
+          LOADTEST_URL: http://${{ secrets.VM_HOST }}:3000/

@@ -19,8 +19,8 @@ function run() {
         console.log(`Load test target: ${TARGET}`);
         const res = await autocannon({
           url: TARGET,
-          connections: 20, // число одновременных соединений
-          duration: 10,    // секунд
+          connections: 5, // число одновременных соединений
+          duration: 5,    // секунд
           pipelining: 1,
           percentiles: [50, 75, 90, 95, 99]
         });
