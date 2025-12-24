@@ -59,22 +59,22 @@ jobs:
       - name: Copy deploy files
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.VM_SSH_PORT || 22 }}
           source: "deploy/docker-compose.prod.yml,init.sql"
           target: ${{ secrets.VM_PATH }}
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.VM_SSH_PORT || 22 }}
           script: |
             set -e
             cd ${{ secrets.VM_PATH }}
-            docker compose --env-file .env -f docker-compose.prod.yml pull
-            docker compose --env-file .env -f docker-compose.prod.yml up -d
+            docker compose --env-file .env -f deploy/docker-compose.prod.yml pull
+            docker compose --env-file .env -f deploy/docker-compose.prod.yml up -d
             docker image prune -f
