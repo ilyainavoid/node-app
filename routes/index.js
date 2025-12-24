@@ -21,29 +21,54 @@ router.post('/new', async function (req, res, next) {
     console.log('Request files:', req.files ? Object.getOwnPropertyNames(req.files) : []);
 
     if (!imageFile) {
-        return res.status(400).send(MSG_IMAGE_REQUIRED);
+        return res.status(400).json({
+            error: MSG_IMAGE_REQUIRED
+        });
     }
 
     try {
+        const startedAt = Date.now();
         const fileName = await saveImage({
             file: imageFile,
             name: req.body['name'],
             description: req.body['description'],
             author: req.body['author']
         });
-        return res.send(fileName);
+        return res.json({
+            timestamp: new Date().toISOString(),
+            data: {
+                fileName: fileName
+            },
+            metadata: {
+                generated_in_ms: Date.now() - startedAt
+            }
+        });
     } catch (err) {
-        return res.status(500).send(err.toString());
+        return res.status(500).json({
+            error: err.toString()
+        });
     }
 });
 
 /* GET all images */
 router.get('/all', async function (req, res, next) {
     try {
+        const startedAt = Date.now();
         const rows = await getAllImages();
-        res.send(rows);
+        res.json({
+            timestamp: new Date().toISOString(),
+            data: {
+                items: rows,
+                total: rows.length
+            },
+            metadata: {
+                generated_in_ms: Date.now() - startedAt
+            }
+        });
     } catch (err) {
-        return res.status(500).send(err.toString());
+        return res.status(500).json({
+            error: err.toString()
+        });
     }
 });
 
